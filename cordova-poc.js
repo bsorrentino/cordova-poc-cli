@@ -67,10 +67,8 @@ function printIpAddresses() {
 function startProxy() {
 	printIpAddresses();
 
-	var options = {
-			  hostname: 'www.chimerarevo.com',
-			  port: 80
-			};
+	options = require("./proxy.json");
+	
 	
 	var _proxy = new proxy( options );
 

@@ -1,0 +1,9 @@
+{
+"hostname": "localhost",
+"port": 8383,
+"url": [
+        { "path": "/api/1.0/posts/post.json", "hostname": "www.chimerarevo.com", "port":80 },
+        { "path": "/api/1.0/posts/posts.json", "hostname": "www.chimerarevo.com", "port":80 }
+       ]
+
+}

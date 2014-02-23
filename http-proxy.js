@@ -32,16 +32,30 @@
 var http = require('http'),
   url = require('url');
 
-module.exports = function PROXY( options) {
+module.exports = function PROXY( config) {
 	
 
 this.server = http.createServer(function(request, response) {
 
-			  
+		var options  = {
+			hostname:config.hostname,
+			port:config.port
+				
+		};
+		
 		target = request.url;
 
 		console.log("Request received. Target: " + target);
 
+		config.url.forEach(function(e) {
+			
+			if( target.indexOf(e.path)!=-1) {
+				
+				options.hostname = e.hostname;
+				options.port = e.port;
+			}
+		});
+		
 		// parse the url
 		url_parts = url.parse(target);
 
@@ -50,21 +64,27 @@ this.server = http.createServer(function(request, response) {
 		var encoding = 'utf8';
 
 		options.path = url_parts.href;
-		options.method = request.method;
+		options.methos = request.method;
 		options.headers = {};
 
 		for ( var h in request.headers) {
-			if (h == "host")
+			if (h == "host" || h =="accept-encoding")
 				continue;
 			options.headers[h] = request.headers[h];
 		}
+		console.dir(options);
 
+		response.setHeader("Access-Control-Allow-Origin", "*"); 
 		var req = http.request(options, function(res) {
 			console.log('STATUS: ' + res.statusCode);
 			console.log('HEADERS: ' + JSON.stringify(res.headers));
 			res.setEncoding(encoding);
 			res.on('data', function(chunk) {
 				response.write(chunk/*, encoding*/);
+				
+				//var StringDecoder = require('string_decoder').StringDecoder;
+				//var decoder = new StringDecoder('utf8');
+				//console.log(decoder.write(chunk));
 			});
 			res.on('end', function() {
 				response.end();
@@ -73,6 +93,7 @@ this.server = http.createServer(function(request, response) {
 
 		req.on('error', function(e) {
 			console.log('problem with request: ' + e.message);
+			response.end();
 		});
 
 		// write data to request body
