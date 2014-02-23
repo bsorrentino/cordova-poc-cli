@@ -28,46 +28,60 @@
 //  $.ajax("http://yoursevice/ajax/request".prx, ...)
 //
  
+
 var http = require('http'),
   url = require('url');
- 
-http.createServer(function(request, response) {
-  target = request.url;
- 
-  if(target[0] == "/") // remove the leading forward slash
-    target = target.substring(1, target.length);
- 
-  console.log("Request received. Target: " + target);
- 
-  // parse the url
-  url_parts = url.parse(target);
-  if(url_parts.host == undefined) { // stop processing, URL must contain http(s)://
-    response.write("ERROR: missing host in target URL " + target);
-    response.end();
-  }
-  else {
- 
-    var proxy = http.createClient(80, url_parts.host);
-    var proxy_request = proxy.request(request.method, url_parts.href, request.headers);
-    
-    console.log("Creating proxy request to server: " + url_parts.hostname + ", path: " + url_parts.pathname);
-    proxy_request.addListener('response', function (proxy_response) {
-      proxy_response.addListener('data', function(chunk) {
-        response.write(chunk, 'binary');
-      });
-      proxy_response.addListener('end', function() {
-        response.end();
-      });
-      response.writeHead(proxy_response.statusCode, proxy_response.headers);
-    });
-    request.addListener('data', function(chunk) {
-      proxy_request.write(chunk, 'binary');
-    });
-    request.addListener('end', function() {
-      proxy_request.end();
-    });
-  }
+
+module.exports = function PROXY( options) {
+	
+
+this.server = http.createServer(function(request, response) {
+
+			  
+		target = request.url;
+
+		console.log("Request received. Target: " + target);
+
+		// parse the url
+		url_parts = url.parse(target);
+
+		//console.dir(request);
+
+		var encoding = 'utf8';
+
+		options.path = url_parts.href;
+		options.method = request.method;
+		options.headers = {};
+
+		for ( var h in request.headers) {
+			if (h == "host")
+				continue;
+			options.headers[h] = request.headers[h];
+		}
+
+		var req = http.request(options, function(res) {
+			console.log('STATUS: ' + res.statusCode);
+			console.log('HEADERS: ' + JSON.stringify(res.headers));
+			res.setEncoding(encoding);
+			res.on('data', function(chunk) {
+				response.write(chunk/*, encoding*/);
+			});
+			res.on('end', function() {
+				response.end();
+			});
+		});
+
+		req.on('error', function(e) {
+			console.log('problem with request: ' + e.message);
+		});
+
+		// write data to request body
+
+		req.end();
+
+  
 }).listen(8080);
 
 console.log("Proxy started. Listening to port 8080");
 
+};
