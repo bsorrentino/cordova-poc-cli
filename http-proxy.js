@@ -32,7 +32,7 @@
 var http = require('http'),
   url = require('url');
 
-module.exports = function PROXY( config) {
+module.exports = function PROXY( lport, config) {
 	
 
 this.server = http.createServer(function(request, response) {
@@ -101,8 +101,8 @@ this.server = http.createServer(function(request, response) {
 		req.end();
 
   
-}).listen(8080);
+}).listen(lport);
 
-console.log("Proxy started. Listening to port 8080");
+console.log("Proxy started. Listening to port " + lport);
 
 };

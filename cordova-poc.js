@@ -29,7 +29,7 @@ for( var i = 0 ; i < args.length; ++i ) {
 			processed = true;
 			break;
 		case "--start-proxy":
-			startProxy(); 
+			startProxy( (++i==args.length) ? 8080 : parseInt(args[i]) ); 
 			processed = true;
 			break;
 		}
@@ -46,7 +46,7 @@ if( !processed ) {
 
 function usage() {
 
-	console.error( "usage: cordova-poc [--zip <folder to zip>] [--new-manifest] [--start-proxy]" );
+	console.error( "usage: cordova-poc [--zip <folder to zip>] [--new-manifest] [--start-proxy [port]]" );
 	process.exit();
 	
 }
@@ -64,13 +64,13 @@ function printIpAddresses() {
 	}	
 
 }
-function startProxy() {
+function startProxy( port ) {
 	printIpAddresses();
 
 	options = require("./proxy.json");
 	
 	
-	var _proxy = new proxy( options );
+	var _proxy = new proxy( port, options );
 
 }
 
