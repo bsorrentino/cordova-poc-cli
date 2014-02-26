@@ -24,6 +24,7 @@
     "url" : "https://github.com/bsorrentino/cordova-poc-cli/issues"
   },
   "dependencies" : {
-    "archiver" : "~0.6.1"
+    "archiver" : "~0.6.1",
+    "cheerio" : "~0.13.1"
   }
 }
