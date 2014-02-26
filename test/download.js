@@ -13,18 +13,29 @@ var download = function(url, dest, callback) {
     file.on('finish', function() {
       file.close();
       if( callback) callback( dest );
-      console.log( "downloaded!");
+      console.log( "%s downloaded!", dest);
     });
   });
 };
 
-var baseUrl = "http://jsfiddle.net/bsorrentino/7XcYS/"
+var baseUrl = "http://codepen.io/andreasstorm/full/peCbd"
+//var baseUrl = "http://jsfiddle.net/hellosze/t22QP";
+//var baseUrl = "http://jsfiddle.net/bsorrentino/YXJMk";
+var targetDir = "/tmp/project2";
 
-download( url.resolve( baseUrl, "/embedded/result/"), 
-         "/tmp/index.html", 
-     function( fileName ) {
+
+var jsfiddle = util.format( "%s/embedded/result/", baseUrl);
+var codepen = baseUrl;
+
+fs.mkdir( targetDir, function() {
+
+
+download( codepen, 
+          util.format( "%s/%s", targetDir, "index.original.html"), 
+          function( fileName ) {
  
-    console.log( "read file %s", fileName);
+    console.log( "read file [%s]", fileName);
+    
     fs.readFile( fileName, function(error, data) {
         
         if( error ) throw error;
@@ -33,7 +44,7 @@ download( url.resolve( baseUrl, "/embedded/result/"),
         
         $ = cheerio.load(html);
         
-        console.log( $.html());
+        //console.log( $.html());
 
         $("script").each( function(i) {
            
@@ -47,9 +58,43 @@ download( url.resolve( baseUrl, "/embedded/result/"),
                 
                 var elems = urlParts.pathname.split("/");
                 
+                var fileName = elems.slice(-1);
+                this.attr("src", util.format( "js/%s", fileName) );
                 //console.dir( urlParts );
-                download( srcUrl, util.format("/tmp/%s", elems.slice(-1)) );
+                fs.mkdir( util.format("%s/js", targetDir), function() {
+                    download( srcUrl, util.format("%s/js/%s", targetDir,fileName) );
+                });
             }
+        });
+        
+        $("link").each( function(i) {
+           
+            var src = this.attr("href");
+            if( src ) {
+                
+                var srcUrl = url.resolve( baseUrl, src );
+                var urlParts = url.parse(srcUrl);
+                
+                console.log( "link href=%s", urlParts.href);
+                
+                var elems = urlParts.pathname.split("/");
+                
+                var fileName = elems.slice(-1);
+                this.attr("href", util.format("css/%s",fileName) );
+                //console.dir( urlParts );
+               fs.mkdir( util.format("%s/css", targetDir), function() {
+                    download( srcUrl, util.format("%s/css/%s", targetDir,fileName) );
+                });
+                
+            }
+        });
+        
+        fs.writeFile( util.format( "%s/%s", targetDir, "index.html"), $.html(), function(err) {
+            if( err ) throw err;
+            //console.log( $.html() );
         });
     });
 } );
+});
+
+
