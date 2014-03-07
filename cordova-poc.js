@@ -1,8 +1,7 @@
 
 var args = process.argv.slice(2);
 
-if( args.length == 0 ) {
-
+if( args.length === 0 ) {
 	usage();
 }
 
@@ -19,23 +18,29 @@ for( var i = 0 ; i < args.length; ++i ) {
 	var p = args[i];
 	//console.log( "parameter " +p );
 	try {
-		switch( p ) {
-		case "--zip":
-			makeZip( args[++i] ); 
-			processed = true;
-			break;
-		case "--new-manifest":
-			createManifest(); 
-			processed = true;
-			break;
-		case "--start-proxy":
-			startProxy( (++i==args.length) ? 8080 : parseInt(args[i]) ); 
-			processed = true;
-			break;
-		}
+        switch (p) {
+            case "project":
+                var project = require('./project');
+                processed = project( args.slice(++i) );
+                i = args.length;
+                break;
+            case "--zip":
+                makeZip(args[++i]);
+                processed = true;
+                break;
+            case "--new-manifest":
+                createManifest();
+                processed = true;
+                break;
+            case "--start-proxy":
+                startProxy((++i == args.length) ? 8080 : parseInt(args[i]));
+                processed = true;
+                break;
+        }
 	}
 	catch( err ) {
-		console.error( "error occurred "+ err ); 
+            console.error( err ); 
+            process.exit();
 	}
 	
 }
@@ -72,48 +77,5 @@ function startProxy( port ) {
 	
 	var _proxy = new proxy( port, options );
 
-}
-
-function ZIPIT( folder, target ) 
-{
-		var archiver = require('archiver');
-	
-		
-		var output = fs.createWriteStream(target);
-		var archive = archiver('zip');
-
-		output.on('close', function() {
-		  console.log(archive.pointer() + ' total bytes');
-		  console.log('archiver has been finalized and the output file descriptor has closed.');
-		});
-
-		archive.on('error', function(err) {
-		  throw err;
-		});
-
-		archive.pipe(output);
-
-		archive.bulk([
-			{ expand: true, cwd: folder, src: ['**/*.*'] }
-		]);
-
-		archive.finalize();
-
-}
-
-/**
-makeZip
-*/
-function makeZip( folder ) {
-	
-	//console.log( "makeZip " + folder  );
-	
-	var stats = fs.statSync(folder);
-	
-	if( !stats.isDirectory() ) {
-		throw  ""+ folder + " is not a directory!";
-	}
-	
-	ZIPIT( folder, __dirname + '/' + path.basename(folder) + '.zip' );		
 }
 
