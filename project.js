@@ -63,13 +63,13 @@ function _open(args) {
         process.chdir( args.path );
         
         
+        var updated = false;
         var json = "{}";
         
         try {
         
             var json = fs.readFileSync( util.format("%s/cordovapoc.json", args.path ), { encoding:'utf8'});
-            
-
+           
         }catch( e ) {
             
             if( e.code === 'ENOENT') {
@@ -88,7 +88,7 @@ function _open(args) {
                           if( name ) {
                               
                               json = util.format('{ "name":"%s", "cordova":"", "icon":"" }', name);
-                              
+                              updated = true;
                           }
                           else {
                               return false;
@@ -115,26 +115,20 @@ function _open(args) {
         
         console.log( util.format("PROJECT: [%s]", o.name ));
 
-        fs.writeFileSync("cordovapoc.json", JSON.stringify(o) );
+        if( updated )
+            fs.writeFileSync("cordovapoc.json", JSON.stringify(o) );
 
-        var outputFolder = "";
-        
-        if( args.zip ) {
-
-            console.log( "ZIPPING" );
-            
-            if( args.o ) {
-                outputFolder = args.o + "/";
-            }else if( args.output ) {
-                outputFolder = args.output + "/";            
-            }
-
-            ZIPIT( args.path, util.format( "%s%s.zip", outputFolder, path.basename(args.path) ));		
-        }
+        if( args.zip ) 
+            _makeZip( args );
 
         return true;
 }
 
+/**
+ * 
+ * @param {string} folder description
+ * @param {string} target description
+*/
 function ZIPIT( folder, target ) 
 {
         var archiver = require('archiver');
@@ -163,21 +157,18 @@ function ZIPIT( folder, target )
 }
 
 /**
-makeZip
+ * 
+ * @param {object} args arguments 
+ *         
 */
-/*
-function _makeZip( folder ) {
+function _makeZip( args ) {
 	
-	//console.log( "makeZip " + folder  );
-	
-	var stats = fs.statSync(folder);
-	
-	if( !stats.isDirectory() ) {
-		throw  ""+ folder + " is not a directory!";
-	}
-	
-	ZIPIT( folder, __dirname + '/' + path.basename(folder) + '.zip' );		
+        console.log( "ZIPPING" );
+
+        ZIPIT( args.path, 
+            path.join( (args.o)?args.o:'', 
+                        (args.output)?args.output:'', 
+                        path.basename(args.path) + ".zip" ));		
 }
-*/
 
 module.exports = project;
