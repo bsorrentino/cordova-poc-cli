@@ -13,6 +13,7 @@ var fs = require('fs'),
         readline = require('readline'),
         path = require('path'),
         os  =   require('os')
+        downloadUrl = require('./download');
 ;
 
 function project(argv) {
@@ -42,14 +43,28 @@ function project(argv) {
         return processed;
 }
 
+/*
+* > cordova-poc create --name=<name> --url=<url> [--output=<output parent folder>]
+*/
 function _create(args) {
 
         if (!args.name) 
             throw "no name provided!"
+        if (!args.url) 
+            throw "no url provided!"
 
+		var ourdir = path.join( (args.o)?args.o:'', 
+                        (args.output)?args.output:'', 
+                        path.basename(args.name) );
+                        
+        downloadUrl( args.url,  ourdir );
+                       		
         return true;
 }
 
+/*
+* > cordova-poc open --path=<project path> [--zip] [--output=<zip output folder>]
+*/
 function _open(args) {
 
         if (!args.path)
