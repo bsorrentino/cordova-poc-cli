@@ -13,7 +13,9 @@ var fs = require('fs'),
         readline = require('readline'),
         path = require('path'),
         os  =   require('os')
-        downloadUrl = require('./download');
+        downloadUrl = require('./download'),
+        manifest = require('./manifest');
+
 ;
 
 function project(argv) {
@@ -77,65 +79,17 @@ function _open(args) {
         
         process.chdir( args.path );
         
-        
-        var updated = false;
-        var json = "{}";
-        
-        try {
-        
-            var json = fs.readFileSync( util.format("%s/cordovapoc.json", args.path ), { encoding:'utf8'});
+        manifest.readOrCreateMF(function(content) {
+
+                        var o = JSON.parse( content );
+
+                        console.log( util.format("PROJECT: [%s]", o.name ));
+
+                        if( args.zip ) 
+                            _makeZip( args );
+
+        });
            
-        }catch( e ) {
-            
-            if( e.code === 'ENOENT') {
-               
-                var rl = readline.createInterface({
-                  input: process.stdin,
-                  output: process.stdout
-                });
-
-                rl.question("do you want create file 'cordovapoc.json' (Y/n)? ", function(answer) {
-                 
-                  if( answer.match(/^[yY]?/)!==null ) {
-                                            
-                      rl.question("name of project?", function(name) {
-
-                          if( name ) {
-                              
-                              json = util.format('{ "name":"%s", "cordova":"", "icon":"" }', name);
-                              updated = true;
-                          }
-                          else {
-                              return false;
-                          }
-                          
-                          rl.close();
-                      });
-                      rl.prompt();
-                      
-                  }
-                  else {
-                      return false;
-                  }
-                  
-
-                });  
-
-                //throw "project is not 'cordova poc' project (missing cordovapoc.json file)!" 
-               
-            }
-        }
-        
-        var o = JSON.parse( json );
-        
-        console.log( util.format("PROJECT: [%s]", o.name ));
-
-        if( updated )
-            fs.writeFileSync("cordovapoc.json", JSON.stringify(o) );
-
-        if( args.zip ) 
-            _makeZip( args );
-
         return true;
 }
 
