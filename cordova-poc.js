@@ -7,43 +7,35 @@ if( args.length === 0 ) {
 
 var fs = require('fs');
 var path = require('path');
-var proxy = require('./http-proxy');
 var os=require('os');
 
 
 // PARSE PARAMETER
 var processed = false;
-for( var i = 0 ; i < args.length; ++i ) {
+var i = 0;
+var p = args[i];
 
-	var p = args[i];
-	//console.log( "parameter " +p );
-	try {
-        switch (p) {
-            case "project":
-                var project = require('./project');
-                processed = project( args.slice(++i) );
-                i = args.length;
-                break;
-            case "--zip":
-                makeZip(args[++i]);
-                processed = true;
-                break;
-            case "--new-manifest":
-                createManifest();
-                processed = true;
-                break;
-            case "--start-proxy":
-                startProxy((++i == args.length) ? 8080 : parseInt(args[i]));
-                processed = true;
-                break;
-        }
-	}
-	catch( err ) {
-            console.error( err ); 
-            process.exit();
-	}
-	
+//console.log( "parameter " +p );
+try {
+    switch (p) {
+        case "project":
+            var project = require('./project');
+            processed = project( args.slice(++i) );
+            i = args.length;
+            break;
+        case "start-proxy":
+        	printIpAddresses();
+        	var proxy = require('./http-proxy');
+        	var _proxy = new proxy( (++i == args.length) ? 8080 : parseInt(args[i]) );
+            processed = true;
+            break;
+    }
 }
+catch( err ) {
+        console.error( err ); 
+        process.exit();
+}
+	
 
 if( !processed ) {
 	usage();
@@ -51,7 +43,7 @@ if( !processed ) {
 
 function usage() {
 
-	console.error( "usage: cordova-poc [--zip <folder to zip>] [--new-manifest] [--start-proxy [port]]" );
+	console.error( "usage: cordova-poc [project create|open] [start-proxy [port]]" );
 	process.exit();
 	
 }
@@ -67,15 +59,6 @@ function printIpAddresses() {
 	    }
 	  });
 	}	
-
-}
-function startProxy( port ) {
-	printIpAddresses();
-
-	options = require("./proxy.json");
-	
-	
-	var _proxy = new proxy( port, options );
 
 }
 

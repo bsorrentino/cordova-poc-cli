@@ -13,8 +13,23 @@ var download = function(theUrl, dest, callback) {
 
     var parts = url.parse(theUrl);
 
-    var onResponse = function(response) {
-        response.pipe(file);
+    var onResponse = function(res) {
+        // Detect a redirect
+        if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
+        	console.log( "redirect to [%s] detected! ", res.headers.location);
+            // The location for some (most) redirects will only contain the path,  not the hostname;
+            // detect this and add the host to the path.
+            if (url.parse(res.headers.location).hostname) {
+                  // Hostname included; make request to res.headers.location
+            	  
+            } else {
+                  // Hostname not included; get host from requested URL (url.parse()) and prepend to location.
+            }
+            
+            console.log( "redirect is not supported yet. Url will be skipped!")
+            return;
+        }
+        res.pipe(file);
         file.on('finish', function() {
             file.close();
             if (callback)
@@ -43,10 +58,10 @@ function downloadUrl(baseUrl, targetDir) {
     if (parts.hostname === "jsfiddle.net") {
         console.log("jsfiddle snippet detected!");
 
-        if (parts.pathname.indexOf("embedded/result") === -1)
+        if (parts.pathname.indexOf("show") === -1)
             theUrl = util.format((parts.pathname.slice(-1) === '/') ?
-                    "%sembedded/result/" :
-                    "%s/embedded/result/", baseUrl);
+                    "%show" :
+                    "%s/show", baseUrl);
     }
 
     fs.mkdir(targetDir, function() {

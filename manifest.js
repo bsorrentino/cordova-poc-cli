@@ -43,11 +43,11 @@ module.exports = {
                     util.format("do you want create file '%s' (Y/n)? ", __MANIFEST_FILENAME),
                     function(answer) {
 
-                        console.log("answer %s", answer);
-                        var m = answer.match(/^[yY]?/)
-                        if (m && m[0] !== '') {
+                        var m = answer.match(/^[yY]?/);
+                        //console.dir(m);
+                        if (m && (m[0] !== '' || m.input==='')) {
 
-                            rl.question("name of project?", function(name) {
+                            rl.question("name of project? ", function(name) {
 
                                 if (name) {
                                     var json = util.format('{ "name":"%s", "cordova":"", "icon":"" }', name);
