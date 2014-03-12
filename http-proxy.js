@@ -30,11 +30,12 @@
  
 
 var http = require('http'),
-  url = require('url');
+  url = require('url'),
+  config = require("./proxy.json")
+;
 
-module.exports = function PROXY( lport, config) {
+module.exports = function PROXY( lport ) {
 	
-
 this.server = http.createServer(function(request, response) {
 
 		var options  = {
