@@ -18,6 +18,61 @@ var fs = require('fs'),
 
 ;
 
+var IMG_MAXLEVEL = 2;
+
+var walk = function(dir, level, accept, transform) {
+    var results = [];
+    
+    if( level > IMG_MAXLEVEL ) return results;
+
+    var list = fs.readdirSync(dir);
+    list.forEach(function(file) {
+        file = path.join(dir,file);
+        var stat = fs.statSync(file);
+        if (stat && stat.isDirectory()) {          
+            results = results.concat(walk(file, level+1, accept, transform));
+        }
+        else { 
+            if( !accept || accept(file)) {
+                results.push( (!transform) ? file : transform(file) ); 
+            }
+        }
+    });
+    return results;
+};
+
+
+var chooseImage = function( folder, callback ) {
+    
+    var images = walk(folder, 1,
+        function(file) { return path.extname(path.basename(file))==='.png'; },
+        function(file) { return path.relative( folder, file ); }
+        
+    );
+    
+    var index = 0;
+    images.forEach( function(file) {
+       
+        console.log( util.format( "[%d] %s", index++, file ));
+    });
+    
+    var rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.question(
+            "Choose image: ",
+            function(answer) {
+                
+                var n = parseInt(answer);
+                
+                callback(images[n]);
+
+                rl.close();
+            });
+};
+
 function project(argv) {
 
         var args = require('minimist')(argv);
@@ -46,7 +101,7 @@ function project(argv) {
 }
 
 /*
-* > cordova-poc create --name=<name> --url=<url> [--output=<output parent folder>]
+* > cordova-poc project create --name=<name> --url=<url> [--output=<output parent folder>]
 */
 function _create(args) {
 
@@ -65,7 +120,13 @@ function _create(args) {
 }
 
 /*
-* > cordova-poc open --path=<project path> [--zip] [--output=<zip output folder>]
+* > cordova-poc project open --path=<project path> 
+*                   [--zip] 
+*                   [--output=<zip output folder>]
+*                   [--set-name=<poc name>]
+*                   [--set-icon]
+*                   [--set-version=<version number>]
+*                   
 */
 function _open(args) {
 
@@ -78,17 +139,51 @@ function _open(args) {
             throw  util.format( "path %s doesn't exist!", args.path );
         
         process.chdir( args.path );
+ 
+        var update = false;
         
+        var finalize = function(o) {
+
+            console.log( "MANIFEST:" );
+            console.dir( o );
+
+            if(updated) {
+                manifest.createMF( JSON.stringify(o) );
+            }
+
+            if( args.zip ) 
+                _makeZip( args );
+            
+        } ;
         manifest.readOrCreateMF(function(content) {
+                var o = JSON.parse( content );
 
-                        var o = JSON.parse( content );
+                console.dir( o );
 
-                        console.log( util.format("PROJECT: [%s]", o.name ));
-
-                        if( args.zip ) 
-                            _makeZip( args );
-
+                if( args['set-name'] ) {
+                    updated = true;
+                    o.name = args['set-name'];
+                }
+                if( args['set-version'] ) {
+                    updated = true;
+                    o.cordova = args['set-version'];
+                }
+                if( args['set-icon'] ) {
+                    updated = true;
+                    chooseImage(args.path, function(icon) {
+                        
+                        if( icon ) o.icon = icon;
+                        
+                        finalize(o);
+                    });
+                }
+                else {
+                    finalize(o);
+                }
+                
         });
+        
+        //console.dir(args);
            
         return true;
 }
