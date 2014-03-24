@@ -94,7 +94,7 @@ function project(argv) {
         }
 
         if (!processed) {
-            throw "not right parameters provided!"
+            throw "not right parameters provided!";
         }
 
         return processed;
@@ -106,16 +106,16 @@ function project(argv) {
 function _create(args) {
 
         if (!args.name) 
-            throw "no name provided!"
+            throw "no name provided!";
         if (!args.url) 
-            throw "no url provided!"
+            throw "no url provided!";
 
-		var ourdir = path.join( (args.o)?args.o:'', 
+		var outdir = path.join( (args.o)?args.o:'', 
                         (args.output)?args.output:'', 
                         path.basename(args.name) );
                         
-        downloadUrl( args.url,  ourdir );
-                       		
+        downloadUrl( args.url,  outdir );
+        
         return true;
 }
 
@@ -131,7 +131,7 @@ function _create(args) {
 function _open(args) {
 
         if (!args.path)
-            throw "no path provided!"
+            throw "no path provided!";
         
         var stats = fs.lstatSync( args.path );
         
@@ -140,7 +140,7 @@ function _open(args) {
         
         process.chdir( args.path );
  
-        var update = false;
+        var updated = false;
         
         var finalize = function(o) {
 
