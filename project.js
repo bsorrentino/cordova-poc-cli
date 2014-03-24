@@ -12,9 +12,9 @@ var fs = require('fs'),
         util = require('util'),
         readline = require('readline'),
         path = require('path'),
-        os  =   require('os')
+        os  =   require('os'),
         downloadUrl = require('./download'),
-        manifest = require('./manifest');
+        manifest = require('./manifest')
 
 ;
 
@@ -79,7 +79,7 @@ function project(argv) {
         //console.dir(args);
 
         if (args._.length === 0) 
-            throw "not enought parameters provided!"
+            throw "not enought parameters provided!";
         
         var processed = false;
         
@@ -114,7 +114,15 @@ function _create(args) {
                         (args.output)?args.output:'', 
                         path.basename(args.name) );
                         
-        downloadUrl( args.url,  outdir );
+        downloadUrl( args.url,  outdir, function() {
+        	
+        	console.log( "END!!!" );
+        	
+        	args.path = outdir;
+        	
+        	_open( args );
+        	
+        } );
         
         return true;
 }
@@ -154,7 +162,10 @@ function _open(args) {
             if( args.zip ) 
                 _makeZip( args );
             
-        } ;
+        };
+        
+        if( args.name ) manifest['name'] = args.name;
+        
         manifest.readOrCreateMF(function(content) {
                 var o = JSON.parse( content );
 

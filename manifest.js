@@ -18,11 +18,13 @@ module.exports = {
     },
     readOrCreateMF: function(onData) {
        
+    	var _self = this;
+    	
         var result = false;
         
         try {
 
-            var json = manifest.readMF();
+            var json = module.exports.readMF();
             onData(json);
             result = true;
 
@@ -31,7 +33,6 @@ module.exports = {
             if (e.code !== 'ENOENT') {
                 console.dir(e);
                 throw e;
-
             }
 
             var rl = readline.createInterface({
@@ -46,9 +47,8 @@ module.exports = {
                         var m = answer.match(/^[yY]?/);
                         //console.dir(m);
                         if (m && (m[0] !== '' || m.input==='')) {
-
-                            rl.question("name of project? ", function(name) {
-
+                        	
+                        	var ff  = function(name) {
                                 if (name) {
                                     var json = util.format('{ "name":"%s", "cordova":"", "icon":"" }', name);
 
@@ -58,10 +58,15 @@ module.exports = {
                                     result = true;
                                 }
                                 rl.close();
+                            };
 
-
-                            });
-                            rl.prompt();
+                            if( _self['name'] ) {
+                            	ff( _self['name']  );
+                            }
+                            else {
+                            	rl.question("name of project? ", ff);
+                            	rl.prompt();
+                            }
 
                         }
                         else {

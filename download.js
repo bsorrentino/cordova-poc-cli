@@ -8,6 +8,21 @@ var http = require('http'),
         url = require('url')
         ;
 
+var MGR = {
+	_res:0,
+	_numReq:0,
+	_onCompletion:null,
+	init:function( numReq, onCompletion ) {
+		this._numReq = numReq;
+		this._onCompletion = onCompletion;
+	},
+	done:function(){
+		if( ++this._res === this._numReq && this._onCompletion ) 
+			this._onCompletion();
+	}
+					
+};
+
 var download = function(theUrl, dest, callback) {
     var file = fs.createWriteStream(dest);
 
@@ -26,7 +41,7 @@ var download = function(theUrl, dest, callback) {
                   // Hostname not included; get host from requested URL (url.parse()) and prepend to location.
             }
             
-            console.log( "redirect is not supported yet. Url will be skipped!")
+            console.log( "redirect is not supported yet. Url will be skipped!");
             return;
         }
         res.pipe(file);
@@ -35,6 +50,7 @@ var download = function(theUrl, dest, callback) {
             if (callback)
                 callback(dest);
             console.log("%s downloaded!", dest);
+            MGR.done();
         });
     };
 
@@ -45,12 +61,15 @@ var download = function(theUrl, dest, callback) {
             http.get(theUrl, onResponse);
 };
 
+
 /**
  * @param {string} baseUrl   url from start download
  * @param {string} targetDir output directory
  */
-function downloadUrl(baseUrl, targetDir) {
-
+function downloadUrl(baseUrl, targetDir, callback ) {
+	var javascripts = [];
+	var links = [];
+	
     var parts = url.parse(baseUrl, false, false);
 
     var theUrl = baseUrl;
@@ -91,16 +110,17 @@ function downloadUrl(baseUrl, targetDir) {
                                 var srcUrl = url.resolve(baseUrl, src);
                                 var urlParts = url.parse(srcUrl);
 
-                                console.log("script src=%s", urlParts.href);
+                                //console.log("script src=%s", urlParts.href);
 
                                 var elems = urlParts.pathname.split("/");
 
                                 var fileName = elems.slice(-1);
                                 this.attr("src", util.format("js/%s", fileName));
+                                
                                 //console.dir( urlParts );
-                                fs.mkdir(util.format("%s/js", targetDir), function() {
-                                    download(srcUrl, util.format("%s/js/%s", targetDir, fileName));
-                                });
+                                
+                                javascripts.push( {url:srcUrl, file:fileName} );
+                                
                             }
                         });
 
@@ -112,24 +132,38 @@ function downloadUrl(baseUrl, targetDir) {
                                 var srcUrl = url.resolve(baseUrl, src);
                                 var urlParts = url.parse(srcUrl);
 
-                                console.log("link href=%s", urlParts.href);
+                                //console.log("link href=%s", urlParts.href);
 
                                 var elems = urlParts.pathname.split("/");
 
                                 var fileName = elems.slice(-1);
                                 this.attr("href", util.format("css/%s", fileName));
+                                
                                 //console.dir( urlParts );
-                                fs.mkdir(util.format("%s/css", targetDir), function() {
-                                    download(srcUrl, util.format("%s/css/%s", targetDir, fileName));
-                                });
-
+                                links.push( {url:srcUrl, file:fileName} );
+                                
                             }
                         });
 
                         fs.writeFile(util.format("%s/%s", targetDir, "index.html"), $.html(), function(err) {
                             if (err)
                                 throw err;
+                            
                             //console.log( $.html() );
+                            MGR.init( javascripts.length + links.length + 1, callback );
+                            
+                           javascripts.forEach( function(info){
+                                fs.mkdir(util.format("%s/js", targetDir), function() {
+                                    download( info.url, util.format("%s/js/%s", targetDir, info.file));
+                                });
+                            });
+                           
+                            links.forEach( function(info) {
+                                fs.mkdir(util.format("%s/css", targetDir), function() {
+                                    download(info.url, util.format("%s/css/%s", targetDir, info.file));
+                                });
+                            });
+
                         });
                     });
                 });
