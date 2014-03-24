@@ -60,8 +60,8 @@ function downloadUrl(baseUrl, targetDir) {
 
         if (parts.pathname.indexOf("show") === -1)
             theUrl = util.format((parts.pathname.slice(-1) === '/') ?
-                    "%show" :
-                    "%s/show", baseUrl);
+                    "%show/" :
+                    "%s/show/", baseUrl);
     }
 
     fs.mkdir(targetDir, function() {
