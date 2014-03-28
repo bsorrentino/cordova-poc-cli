@@ -12,6 +12,13 @@ cordova-poc-cli
 
 ```
 
+## update
+
+```
+ > npm update -g cordova-poc
+
+```
+
 ## Usage
 
 

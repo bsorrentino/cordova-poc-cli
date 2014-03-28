@@ -42,9 +42,10 @@ if( !processed ) {
 }
 
 function usage() {
-
-	console.error( "usage: cordova-poc [project create|open] [start-proxy [port]]" );
-	process.exit();
+    var pjson = require('./package.json');
+    console.error( "version: " + pjson.version );
+    console.error( "usage: cordova-poc [project create|open ....] [start-proxy [port]]" );
+    process.exit();
 	
 }
 
