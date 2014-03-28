@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 
-var cli = require('./cordova-poc.js');
+var cli = require('../cordova-poc.js');
 
 
