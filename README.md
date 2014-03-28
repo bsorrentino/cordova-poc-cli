@@ -1,7 +1,18 @@
+
 cordova-poc-cli
 ===============
 
-cordova-poc command line interface
+[cordova-poc](http://bsorrentino.github.io/cordova-poc/) command line interface
+
+
+## Install
+
+```
+ > npm install -g cordova-poc
+
+```
+
+## Usage
 
 
 ### Create project from an URL
