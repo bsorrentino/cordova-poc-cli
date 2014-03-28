@@ -79,7 +79,7 @@ function downloadUrl(baseUrl, targetDir, callback ) {
 
         if (parts.pathname.indexOf("show") === -1)
             theUrl = util.format((parts.pathname.slice(-1) === '/') ?
-                    "%show/" :
+                    "%sshow/" :
                     "%s/show/", baseUrl);
     }
 
