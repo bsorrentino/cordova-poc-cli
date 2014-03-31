@@ -160,7 +160,7 @@ function _open(args) {
             }
 
             if( args.zip ) 
-                _makeZip( args );
+                _makeZip( args, manifest );
             
         };
         
@@ -236,14 +236,14 @@ function ZIPIT( folder, target )
  * @param {object} args arguments 
  *         
 */
-function _makeZip( args ) {
+function _makeZip( args, manifest ) {
 	
         console.log( "ZIPPING" );
 
         ZIPIT( args.path, 
             path.join( (args.o)?args.o:'', 
                         (args.output)?args.output:'', 
-                        path.basename(args.path) + ".zip" ));		
+                        /*path.basename(args.path)*/ manifest.name + ".zip" ));		
 }
 
 module.exports = project;
