@@ -5,7 +5,8 @@ var http = require('http'),
         fs = require('fs'),
         cheerio = require('cheerio'),
         util = require('util'),
-        url = require('url')
+        url = require('url'),
+        path = require("path")
         ;
 
 var MGR = {
@@ -113,13 +114,14 @@ function downloadUrl(baseUrl, targetDir, callback ) {
                                 //console.log("script src=%s", urlParts.href);
 
                                 var elems = urlParts.pathname.split("/");
-
-                                var fileName = elems.slice(-1);
-                                this.attr("src", util.format("js/%s", fileName));
+                                
+                                var fileName = elems.slice(-2);
+                                
+                                this.attr("src", path.join(fileName[0], fileName[1]) );
                                 
                                 //console.dir( urlParts );
                                 
-                                javascripts.push( {url:srcUrl, file:fileName} );
+                                javascripts.push( {url:srcUrl, file:{path:fileName[0], name:fileName[1]} });
                                 
                             }
                         });
@@ -136,16 +138,16 @@ function downloadUrl(baseUrl, targetDir, callback ) {
 
                                 var elems = urlParts.pathname.split("/");
 
-                                var fileName = elems.slice(-1);
-                                this.attr("href", util.format("css/%s", fileName));
+                                var fileName = elems.slice(-2);
+                                this.attr("href", path.join(fileName[0], fileName[1]) );
                                 
                                 //console.dir( urlParts );
-                                links.push( {url:srcUrl, file:fileName} );
+                                links.push( {url:srcUrl, file:{path:fileName[0], name:fileName[1]} });
                                 
                             }
                         });
 
-                        fs.writeFile(util.format("%s/%s", targetDir, "index.html"), $.html(), function(err) {
+                        fs.writeFile( path.join(targetDir, "index.html"), $.html(), function(err) {
                             if (err)
                                 throw err;
                             
@@ -153,14 +155,14 @@ function downloadUrl(baseUrl, targetDir, callback ) {
                             MGR.init( javascripts.length + links.length + 1, callback );
                             
                            javascripts.forEach( function(info){
-                                fs.mkdir(util.format("%s/js", targetDir), function() {
-                                    download( info.url, util.format("%s/js/%s", targetDir, info.file));
+                                fs.mkdir( path.join(targetDir, info.file.path), function() {
+                                    download( info.url, path.join( targetDir, info.file.path, info.file.name) );
                                 });
                             });
                            
                             links.forEach( function(info) {
-                                fs.mkdir(util.format("%s/css", targetDir), function() {
-                                    download(info.url, util.format("%s/css/%s", targetDir, info.file));
+                                fs.mkdir(path.join(targetDir,info.file.path ), function() {
+                                    download(info.url, path.join( targetDir, info.file.path, info.file.name));
                                 });
                             });
 
