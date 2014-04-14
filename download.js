@@ -147,6 +147,27 @@ function downloadUrl(baseUrl, targetDir, callback ) {
                             }
                         });
 
+                        $("img").each(function(i) {
+
+                            var src = this.attr("src");
+                            if (src) {
+
+                                var srcUrl = url.resolve(baseUrl, src);
+                                var urlParts = url.parse(srcUrl);
+
+                                //console.log("link href=%s", urlParts.href);
+
+                                var elems = urlParts.pathname.split("/");
+
+                                var fileName = elems.slice(-2);
+                                this.attr("src", path.join(fileName[0], fileName[1]) );
+                                
+                                //console.dir( urlParts );
+                                links.push( {url:srcUrl, file:{path:fileName[0], name:fileName[1]} });
+                                
+                            }
+                        });
+
                         fs.writeFile( path.join(targetDir, "index.html"), $.html(), function(err) {
                             if (err)
                                 throw err;
