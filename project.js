@@ -160,11 +160,9 @@ function _open(args) {
             }
 
             if( args.zip ) 
-                _makeZip( args, manifest );
+                _makeZip( args, o );
             
         };
-        
-        if( args.name ) manifest['name'] = args.name;
         
         manifest.readOrCreateMF(function(content) {
                 var o = JSON.parse( content );
@@ -234,6 +232,7 @@ function ZIPIT( folder, target )
 /**
  * 
  * @param {object} args arguments 
+ * @param {object} manifest arguments 
  *         
 */
 function _makeZip( args, manifest ) {
@@ -243,7 +242,7 @@ function _makeZip( args, manifest ) {
         ZIPIT( args.path, 
             path.join( (args.o)?args.o:'', 
                         (args.output)?args.output:'', 
-                        /*path.basename(args.path)*/ manifest.name + ".zip" ));		
+                        manifest.name + ".zip" ));		
 }
 
 module.exports = project;
