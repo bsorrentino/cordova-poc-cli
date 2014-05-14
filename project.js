@@ -146,6 +146,8 @@ function _open(args) {
         if( !stats.isDirectory() )
             throw  util.format( "path %s doesn't exist!", args.path );
         
+        var _curdir = process.cwd();
+        
         process.chdir( args.path );
  
         var updated = false;
@@ -160,6 +162,7 @@ function _open(args) {
             }
 
             if( args.zip ) 
+                process.chdir( _curdir );
                 _makeZip( args, o );
             
         };
@@ -217,6 +220,9 @@ function ZIPIT( folder, target )
 
         archive.on('error', function(err) {
           throw err;
+        });
+        archive.on('entry', function(e) {
+          console.log("entry " + e.name);
         });
 
         archive.pipe(output);
